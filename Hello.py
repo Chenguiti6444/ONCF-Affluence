@@ -102,7 +102,7 @@ if st.button('Prédire l\'affluence'):
     
     if prediction_value < 0.10:
         st.image("Images/Affluence Faible.png")  # Adjust path as needed
-    elif prediction_value < 0.20:
+    elif prediction_value < 0.22:
         st.image("Images/Affluence Moyenne.png")  # Adjust path as needed
     else:
         st.image("Images/Affluence Forte.png")  # Adjust path as needed
