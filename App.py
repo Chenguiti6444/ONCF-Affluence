@@ -187,7 +187,7 @@ with col2:
                     difference_percentage = ((prediction_value - prediction_result) / prediction_value) * 100
                     # Ici, nous convertissons le pourcentage en scalaire pour éviter les erreurs de formatage
                     difference_percentage_value = round(difference_percentage.item())
-                    result["Différence d'affluence"] = f"{difference_percentage_value}% moins chargé que le train choisi"
+                    result["Différence d'Affluence"] = f"{difference_percentage_value}% moins chargé que le train choisi"
                     results_with_comparison.append(result)
 
                 # Triez les résultats pour obtenir les prédictions les plus faibles par rapport à la référence
@@ -197,7 +197,8 @@ with col2:
                 sorted_results = sorted_results.reset_index(drop=True)
 
                 with col1:
+                    st.subheader('Top 5 des Trains les Moins Chargés')
                     # Affichez les résultats dans un tableau
-                    st.dataframe(sorted_results[['Heure', 'Gamme', 'Numéro de Train', "Différence d'affluence"]],hide_index=True)
+                    st.dataframe(sorted_results[['Heure', 'Gamme', 'Numéro de Train', "Différence d'Affluence"]],hide_index=True)
 
 
