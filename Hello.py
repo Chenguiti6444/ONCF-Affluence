@@ -31,6 +31,8 @@ def update_num_train(od_choice, heure_choice, gamme_choice):
     num_trains = sorted(set([train.strip() for sublist in filtered_data['N° de train'].dropna().str.split(',') for train in sublist]))
     return num_trains
 
+st.set_page_config(layout="wide")
+
 # Créez l'interface Streamlit
 st.title("Prédicteur d'Affluence Train")
 
