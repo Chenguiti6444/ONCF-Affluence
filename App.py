@@ -5,6 +5,7 @@ from datetime import datetime
 import tensorflow as tf
 import pickle
 import numpy as np
+from PIL import Image
 from sklearn.preprocessing import StandardScaler
 
 # Chargez les données
@@ -81,10 +82,11 @@ def update_num_train(od_choice, heure_choice, gamme_choice):
 
 st.set_page_config(layout="wide")
 
-# Créez l'interface Streamlit
-st.title("Prédicteur d'Affluence Train")
+# Chargement du logo et affichage en entête de page
+logo = Image.open('Images/Logo.png')
+st.image(logo, width=100)
 
-# Utilisation de st.columns pour diviser les widgets en deux colonnes
+# Utilisation de st.columns pour diviser la page en deux colonnes
 col1, col2 = st.columns(2)
 
 with col1:
