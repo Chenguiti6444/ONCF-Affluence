@@ -84,7 +84,7 @@ st.set_page_config(layout="wide")
 
 # Chargement du logo et affichage en entête de page
 logo = Image.open('Images/Logo.png')
-st.image(logo, width=100)
+st.image(logo, width=200)
 
 # Utilisation de st.columns pour diviser la page en deux colonnes
 col1, col2 = st.columns(2)
