@@ -199,7 +199,7 @@ with col2:
                 sorted_results = sorted_results.reset_index(drop=True)
 
                 with col1:
-                    st.subheader('Top 5 des Trains les Moins Chargés')
+                    st.subheader('Suggestions de Trains Moins Chargés')
                     # Affichez les résultats dans un tableau
                     st.dataframe(sorted_results[['Heure', 'Gamme', 'Numéro de Train', "Différence d'Affluence"]],hide_index=True)
 
