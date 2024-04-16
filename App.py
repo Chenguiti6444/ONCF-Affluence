@@ -193,9 +193,7 @@ with col1:
 
                                                     # Triez les résultats pour obtenir les prédictions les plus faibles par rapport à la référence
                                                     results_df = pd.DataFrame(results_with_comparison)
-                                                    sorted_results = results_df.sort_values(by='Prédiction').head(5)
-                                                    # Réinitialiser l'index du DataFrame et supprimer l'ancien index
-                                                    sorted_results = sorted_results.reset_index(drop=True)
+                                                    sorted_results = results_df.sort_values(by='Heure').head(5)
 
                                                     with col1:
                                                         st.subheader('Suggestions de Trains Moins Chargés')
