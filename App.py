@@ -189,8 +189,9 @@ with col2:
                     difference_percentage = ((prediction_value - prediction_result) / prediction_value) * 100
                     # Ici, nous convertissons le pourcentage en scalaire pour éviter les erreurs de formatage
                     difference_percentage_value = round(difference_percentage.item())
-                    result["Différence d'Affluence"] = f"{difference_percentage_value}% moins chargé que le train choisi"
-                    results_with_comparison.append(result)
+                    if difference_percentage_value>0:
+                        result["Différence d'Affluence"] = f"{difference_percentage_value}% moins chargé que le train choisi"
+                        results_with_comparison.append(result)
 
                 # Triez les résultats pour obtenir les prédictions les plus faibles par rapport à la référence
                 results_df = pd.DataFrame(results_with_comparison)
