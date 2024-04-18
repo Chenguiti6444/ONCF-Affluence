@@ -8,8 +8,13 @@ import numpy as np
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
 
+# Chemin du logo ONCF-Affluence
+logo = Image.open('Images/Logo.png')
+favicon=Image.open('Images/Favicon.png')
+
 # Configuration de la page
-st.set_page_config(layout="wide")
+st.set_page_config(page_title="ONCF-Affluence", page_icon=favicon, layout="wide")
+
 # Chargez les données
 data = pd.read_csv('Aggregation des N° de Trains par OD+Gamme+Heure.csv')
 
@@ -132,7 +137,7 @@ def display_results(results):
     sorted_results = results_df.sort_values(by='Prédiction').head(5)
     st.table(sorted_results)
 
-logo = Image.open('Images/Logo.png')
+
 st.image(logo, width=200)
 
 # Utilisation de st.columns pour diviser la page en deux colonnes
