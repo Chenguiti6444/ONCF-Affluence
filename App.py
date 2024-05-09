@@ -94,6 +94,11 @@ def update_num_train(od_choice, heure_choice, gamme_choice):
     num_trains = sorted(set([train.strip() for sublist in filtered_data['N° de train'].dropna().str.split(',') for train in sublist]))
     return num_trains
 
+# Créer une fonction pour extraire le pourcentage de la chaîne
+def extract_percentage(difference_string):
+    # Séparer la chaîne par les espaces et extraire le pourcentage
+    return int(difference_string.split('%')[0])
+
 # Initialisation des préprocesseurs et du modèle
 model_path = 'RegDNN_model.tf'
 label_encoders_path = 'label_encoders.pkl'
@@ -104,7 +109,7 @@ model, label_encoders, scaler = load_model_and_preprocessors(model_path, label_e
 def calculate_all_predictions(date, od_choice,heure_choice):
     # Convertir l'heure choisie en integer pour la comparaison
     selected_heure_int = int(heure_choice)
-    heures = [heure for heure in update_heures(od_choice,heure_choice) if int(heure) > selected_heure_int]
+    heures = [heure for heure in update_heures(od_choice,heure_choice) if int(heure) > selected_heure_int-4]
     all_combinations = []
     results = []
 
@@ -195,10 +200,14 @@ with col1:
                                                             result["Différence d'Affluence"] = f"{difference_percentage_value}% moins chargé que le train choisi"
                                                             results_with_comparison.append(result)
 
-                                                    # Triez les résultats pour obtenir les prédictions les plus faibles par rapport à la référence
+                                                    # Trier les résultats par différence d'affluence (en ordre décroissant) puis par heure (en ordre croissant)
                                                     results_df = pd.DataFrame(results_with_comparison)
-                                                    sorted_results = results_df.sort_values(by='Heure').head(5)
+                                                    # Ajouter une colonne pour le pourcentage extrait
+                                                    results_df['Pourcentage'] = results_df["Différence d'Affluence"].apply(extract_percentage)
 
+                                                    # Trier les résultats par pourcentage décroissant puis par Heure (croissant)
+                                                    sorted_results = results_df.sort_values(['Pourcentage'], ascending=False).head(5)
+                                                    sorted_results.sort_values(['Heure'], ascending=True,inplace=True)
                                                     with col1:
                                                         st.subheader('Suggestions de Trains Moins Chargés')
                                                         # Affichez les résultats dans un tableau
