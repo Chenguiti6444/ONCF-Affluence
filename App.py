@@ -27,8 +27,7 @@ destinations = sorted([destination.strip() for destination in data['Destination'
 # Chargement du modèle et des préprocesseurs
 @st.cache_resource
 def load_model_and_preprocessors(model_path, label_encoders_path, scaler_path):
-    load_options = tf.saved_model.LoadOptions(experimental_io_device='/job:localhost')
-    model = tf.keras.models.load_model(model_path, options=load_options)
+    model = tf.keras.models.load_model(model_path)
     with open(label_encoders_path, 'rb') as le_file:
         label_encoders = pickle.load(le_file)
     with open(scaler_path, 'rb') as scaler_file:
@@ -125,7 +124,7 @@ def calculate_all_predictions(date, od_choice,heure_choice):
         prediction = model.predict(inputs_preprocessed)[0]
 
         # Stocker les résultats avec leurs caractéristiques
-        results.append({'Heure': heure, 'Gamme': gamme, 'Numéro de Train': num_train, 'Prédiction': prediction})
+        results.append({'Heure': heure, 'Gamme': gamme, 'N° de Train': num_train, 'Prédiction': prediction})
 
     return results
 
@@ -150,7 +149,7 @@ with col1:
     col3, col4 = st.columns(2)
     with col3:
         if selected_date: 
-            origine_choice = st.selectbox("Gare de Départ", origines, index=None,placeholder="Veuillez choisir une gare")
+            origine_choice = st.selectbox("Gare de départ", origines, index=None,placeholder="Veuillez choisir une gare")
             if origine_choice:
                 with col4:
                     destination_choice = st.selectbox("Gare d'arrivée", updateDestination(origine_choice), index=None,placeholder="Veuillez choisir une gare")
@@ -203,7 +202,7 @@ with col1:
                                                     with col1:
                                                         st.subheader('Suggestions de Trains Moins Chargés')
                                                         # Affichez les résultats dans un tableau
-                                                        st.dataframe(sorted_results[['Heure', 'Gamme', 'Numéro de Train', "Différence d'Affluence"]],hide_index=True)
+                                                        st.dataframe(sorted_results[['Heure', 'Gamme', 'N° de Train', "Différence d'Affluence"]],hide_index=True)
                             else:
                                 st.warning("Aucun train n'est disponible aujourd'hui pour le trajet sélectionné.")
 
