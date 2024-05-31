@@ -3,7 +3,6 @@ import pandas as pd
 import itertools
 import zipfile
 from datetime import datetime
-import tensorflow as tf
 import pickle
 from catboost import CatBoostRegressor
 import numpy as np
@@ -222,16 +221,24 @@ with col1:
 
                                                     # Trier les résultats par différence d'affluence (en ordre décroissant) puis par heure (en ordre croissant)
                                                     results_df = pd.DataFrame(results_with_comparison)
-                                                    # Ajouter une colonne pour le pourcentage extrait
-                                                    results_df['Pourcentage'] = results_df["Différence d'Affluence"].apply(extract_percentage)
+                                                    # Vérifier si la clé "Différence d'Affluence" existe dans les résultats
+                                                    if "Différence d'Affluence" in results_df.columns:
+                                                        # Appliquer la fonction extract_percentage uniquement si la clé existe
+                                                        results_df['Pourcentage'] = results_df["Différence d'Affluence"].apply(extract_percentage)
+                                                    else:
+                                                        # Ajouter une colonne vide si la clé n'existe pas pour éviter les erreurs
+                                                        results_df['Pourcentage'] = None
 
                                                     # Trier les résultats par pourcentage décroissant puis par Heure (croissant)
-                                                    sorted_results = results_df.sort_values(['Pourcentage'], ascending=False).head(5)
-                                                    sorted_results.sort_values(['Heure'], ascending=True,inplace=True)
-                                                    with col1:
-                                                        st.subheader('Suggestions de Trains Moins Chargés')
-                                                        # Affichez les résultats dans un tableau
-                                                        st.dataframe(sorted_results[['Heure', 'Gamme', 'N° de Train', "Différence d'Affluence"]],hide_index=True)
+                                                    if not results_df.empty:
+                                                        sorted_results = results_df.sort_values(['Pourcentage'], ascending=False).head(5)
+                                                        sorted_results.sort_values(['Heure'], ascending=True,inplace=True)
+                                                        with col1:
+                                                            st.subheader('Suggestions de Trains Moins Chargés')
+                                                            # Affichez les résultats dans un tableau
+                                                            st.dataframe(sorted_results[['Heure', 'Gamme', 'N° de Train', "Différence d'Affluence"]],hide_index=True)
+                                                    else:
+                                                        sorted_results = pd.DataFrame(columns=['Heure', 'Gamme', 'N° de Train', "Différence d'Affluence"])
                             else:
                                 st.warning("Aucun train n'est disponible aujourd'hui pour le trajet sélectionné.")
 
