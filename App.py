@@ -1,9 +1,11 @@
 import streamlit as st
 import pandas as pd
 import itertools
+import zipfile
 from datetime import datetime
 import tensorflow as tf
 import pickle
+from catboost import CatBoostRegressor
 import numpy as np
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
@@ -26,18 +28,24 @@ destinations = sorted([destination.strip() for destination in data['Destination'
 
 # Chargement du modèle et des préprocesseurs
 @st.cache_resource
-def load_model_and_preprocessors(model_path, label_encoders_path, scaler_path):
-    model = tf.keras.models.load_model(model_path)
-    with open(label_encoders_path, 'rb') as le_file:
-        label_encoders = pickle.load(le_file)
-    with open(scaler_path, 'rb') as scaler_file:
-        scaler = pickle.load(scaler_file)
-    return model, label_encoders, scaler
+def load_model_and_preprocessors(model_zip_path, encoder_path):
+    # Extract the model file from the zip archive
+    with zipfile.ZipFile(model_zip_path, 'r') as zip_ref:
+        zip_ref.extractall()
+    
+    # Load the model from the extracted file
+    model = CatBoostRegressor()
+    model.load_model("model_catboost.cbm")  # Assuming the model file is named model_catboost.cbm
+    
+    # Load the encoder from the provided path
+    with open(encoder_path, 'rb') as file:
+        encoder = pickle.load(file)
+    
+    return model, encoder
 
 
 # Prétraitement des entrées pour le modèle
-def preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_date, label_encoders, scaler):
-    # Convertir les entrées en format attendu par le modèle
+def preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_date, encoder):
     inputs = pd.DataFrame({
         'Nº de train': [num_train_choice],
         'Gamme': [gamme_choice],
@@ -46,13 +54,14 @@ def preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_dat
         'Mois': [selected_date.month]
     })
     
-    # Appliquer l'encodage des labels
-    for col in ['Gamme', 'Nº de train']:
-        inputs[col] = label_encoders[col].transform(inputs[col])
+    # Encodage des caractéristiques catégorielles
+    encoded_features = encoder.transform(inputs[['Nº de train', 'Gamme']])
+    encoded_features_df = pd.DataFrame(encoded_features, columns=encoder.get_feature_names_out(['Nº de train', 'Gamme']))
     
-    # Appliquer la mise à l'échelle des données numériques
-    inputs = scaler.transform(inputs)
-    return inputs
+    # Concaténer les caractéristiques encodées avec les autres caractéristiques
+    features = pd.concat([inputs[['Heure', 'Jour_Semaine', 'Mois']], encoded_features_df], axis=1)
+    
+    return features
 
 # Fonction pour mettre à jour les destinations basées sur l'origine sélectionnée
 def updateDestination(origine):
@@ -100,38 +109,47 @@ def extract_percentage(difference_string):
     return int(difference_string.split('%')[0])
 
 # Initialisation des préprocesseurs et du modèle
-model_path = 'RegDNN_model.tf'
-label_encoders_path = 'label_encoders.pkl'
-scaler_path = 'RegDNN_features_scaler.pkl'
-model, label_encoders, scaler = load_model_and_preprocessors(model_path, label_encoders_path, scaler_path)
+model_zip_path = 'model_catboost.zip'
+encoder_path = 'encoder.pkl'
+model, encoder = load_model_and_preprocessors(model_zip_path, encoder_path)
 
 # Calculer toutes les prédictions possibles
-def calculate_all_predictions(date, od_choice,heure_choice):
+def calculate_all_predictions(date, od_choice, heure_choice, model, encoder):
     # Convertir l'heure choisie en integer pour la comparaison
     selected_heure_int = int(heure_choice)
-    heures = [heure for heure in update_heures(od_choice,heure_choice) if int(heure) > selected_heure_int-4]
-    all_combinations = []
-    results = []
+    # Définir l'intervalle de 4 heures avant et après l'heure choisie
+    interval_start = selected_heure_int - 4
+    interval_end = selected_heure_int + 4
 
-    # Obtenir toutes les gammes et numéros de train pour chaque heure
+    # Obtenir toutes les heures possibles pour la destination choisie,
+    # en incluant seulement les heures dans l'intervalle spécifié
+    heures = [heure for heure in update_heures(od_choice, heure_choice) if interval_start <= int(heure) <= interval_end]
+    all_combinations = []  # Stocker toutes les combinaisons possibles d'heure, gamme et numéro de train
+    results = []  # Stocker les résultats des prédictions
+
+    # Pour chaque heure possible
     for heure in heures:
+        # Obtenir toutes les gammes pour cette heure
         gammes = update_gammes(od_choice, heure)
+        # Pour chaque gamme
         for gamme in gammes:
+            # Obtenir tous les numéros de train pour cette heure et cette gamme
             num_trains = update_num_train(od_choice, heure, gamme)
-            # Créer des combinaisons de heure, gamme et numéro de train
+            # Créer toutes les combinaisons possibles d'heure, gamme et numéro de train
             combinations = list(itertools.product([heure], [gamme], num_trains))
-            all_combinations.extend(combinations)
+            all_combinations.extend(combinations)  # Ajouter les combinaisons à la liste totale
 
-    # Faire des prédictions pour chaque combinaison
+    # Pour chaque combinaison possible
     for heure, gamme, num_train in all_combinations:
-        # Préparation des entrées pour le modèle
-        inputs_preprocessed = preprocess_inputs(heure, gamme, num_train, date, label_encoders, scaler)
+        # Prétraiter les entrées pour les rendre compatibles avec le modèle
+        inputs_preprocessed = preprocess_inputs(heure, gamme, num_train, date, encoder)
+        # Faire une prédiction avec le modèle
         prediction = model.predict(inputs_preprocessed)[0]
-
-        # Stocker les résultats avec leurs caractéristiques
+        # Stocker les résultats avec les caractéristiques correspondantes
         results.append({'Heure': heure, 'Gamme': gamme, 'N° de Train': num_train, 'Prédiction': prediction})
 
     return results
+
 
 # Afficher les résultats
 def display_results(results):
@@ -174,18 +192,18 @@ with col1:
 
                                         if selected_date and od_choice and heure_choice and gamme_choice and num_train_choice:
                                             if st.button('Prédire l\'affluence'):
-                                                inputs_preprocessed = preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_date, label_encoders, scaler)
+                                                inputs_preprocessed = preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_date, encoder)
                                                 prediction = model.predict(inputs_preprocessed)
                                                 prediction_value = prediction[0]
 
-                                                if prediction_value < 0.10:
+                                                if prediction_value < 0.105:
                                                     st.image("Images/Affluence Faible.png", width=200)
-                                                elif prediction_value < 0.23:
+                                                elif prediction_value < 0.42:
                                                     st.image("Images/Affluence Moyenne.png", width=200)
                                                 else:
                                                     st.image("Images/Affluence Forte.png", width=200)
                                                 if selected_date and od_choice and num_train_choice and prediction_value>0.10:
-                                                    results = calculate_all_predictions(selected_date, od_choice,heure_choice)
+                                                    results = calculate_all_predictions(selected_date, od_choice,heure_choice,model,encoder)
 
                                                     # Ensuite, comparez les prédictions et calculez le pourcentage de différence
                                                     results_with_comparison = []
@@ -193,6 +211,8 @@ with col1:
                                                     for result in results:
                                                         # Extraire le scalaire de la prédiction avant de faire le calcul
                                                         prediction_result = result['Prédiction']
+                                                        # Limiter la valeur minimale de prediction_result à 0
+                                                        prediction_result = max(prediction_result, 0)
                                                         difference_percentage = ((prediction_value - prediction_result) / prediction_value) * 100
                                                         # Ici, nous convertissons le pourcentage en scalaire pour éviter les erreurs de formatage
                                                         difference_percentage_value = round(difference_percentage.item())
