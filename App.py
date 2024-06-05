@@ -105,7 +105,7 @@ def update_num_train(od_choice, heure_choice, gamme_choice):
 # Créer une fonction pour extraire le pourcentage de la chaîne
 def extract_percentage(difference_string):
     # Séparer la chaîne par les espaces et extraire le pourcentage
-    return int(difference_string.split('%')[0])
+    return float(difference_string.split('%')[0])
 
 # Initialisation des préprocesseurs et du modèle
 model_zip_path = 'model_catboost.zip'
@@ -197,11 +197,11 @@ with col1:
 
                                                 if prediction_value < 0.105:
                                                     st.image("Images/Affluence Faible.png", width=200)
-                                                elif prediction_value < 0.42:
+                                                elif prediction_value < 0.46:
                                                     st.image("Images/Affluence Moyenne.png", width=200)
                                                 else:
                                                     st.image("Images/Affluence Forte.png", width=200)
-                                                if selected_date and od_choice and num_train_choice and prediction_value>0.10:
+                                                if selected_date and od_choice and num_train_choice and prediction_value>=0.105:
                                                     results = calculate_all_predictions(selected_date, od_choice,heure_choice,model,encoder)
 
                                                     # Ensuite, comparez les prédictions et calculez le pourcentage de différence
@@ -213,32 +213,23 @@ with col1:
                                                         # Limiter la valeur minimale de prediction_result à 0
                                                         prediction_result = max(prediction_result, 0)
                                                         difference_percentage = ((prediction_value - prediction_result) / prediction_value) * 100
-                                                        # Ici, nous convertissons le pourcentage en scalaire pour éviter les erreurs de formatage
-                                                        difference_percentage_value = round(difference_percentage.item())
+                                                        # Ici, on convertit le pourcentage en scalaire pour éviter les erreurs de formatage et on l'arrondit
+                                                        difference_percentage_value = round(difference_percentage, 1)
                                                         if difference_percentage_value>0:
                                                             result["Différence d'Affluence"] = f"{difference_percentage_value}% moins chargé que le train choisi"
                                                             results_with_comparison.append(result)
 
-                                                    # Trier les résultats par différence d'affluence (en ordre décroissant) puis par heure (en ordre croissant)
                                                     results_df = pd.DataFrame(results_with_comparison)
-                                                    # Vérifier si la clé "Différence d'Affluence" existe dans les résultats
-                                                    if "Différence d'Affluence" in results_df.columns:
-                                                        # Appliquer la fonction extract_percentage uniquement si la clé existe
-                                                        results_df['Pourcentage'] = results_df["Différence d'Affluence"].apply(extract_percentage)
-                                                    else:
-                                                        # Ajouter une colonne vide si la clé n'existe pas pour éviter les erreurs
-                                                        results_df['Pourcentage'] = None
-
-                                                    # Trier les résultats par pourcentage décroissant puis par Heure (croissant)
                                                     if not results_df.empty:
+                                                        # Appliquer la fonction extract_percentage
+                                                        results_df['Pourcentage'] = results_df["Différence d'Affluence"].apply(extract_percentage)
+                                                        # Trier les résultats par pourcentage décroissant puis par Heure (croissant)
                                                         sorted_results = results_df.sort_values(['Pourcentage'], ascending=False).head(5)
                                                         sorted_results.sort_values(['Heure'], ascending=True,inplace=True)
                                                         with col1:
                                                             st.subheader('Suggestions de Trains Moins Chargés')
                                                             # Affichez les résultats dans un tableau
                                                             st.dataframe(sorted_results[['Heure', 'Gamme', 'N° de Train', "Différence d'Affluence"]],hide_index=True)
-                                                    else:
-                                                        sorted_results = pd.DataFrame(columns=['Heure', 'Gamme', 'N° de Train', "Différence d'Affluence"])
                             else:
                                 st.warning("Aucun train n'est disponible aujourd'hui pour le trajet sélectionné.")
 
