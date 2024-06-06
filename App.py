@@ -7,7 +7,6 @@ import pickle
 from catboost import CatBoostRegressor
 import numpy as np
 from PIL import Image
-from sklearn.preprocessing import StandardScaler
 
 # Chemin du logo ONCF-Affluence
 logo = Image.open('Images/Logo.png')
@@ -102,11 +101,6 @@ def update_num_train(od_choice, heure_choice, gamme_choice):
     num_trains = sorted(set([train.strip() for sublist in filtered_data['N° de train'].dropna().str.split(',') for train in sublist]))
     return num_trains
 
-# Créer une fonction pour extraire le pourcentage de la chaîne
-def extract_percentage(difference_string):
-    # Séparer la chaîne par les espaces et extraire le pourcentage
-    return float(difference_string.split('%')[0])
-
 # Initialisation des préprocesseurs et du modèle
 model_zip_path = 'model_catboost.zip'
 encoder_path = 'encoder.pkl'
@@ -122,7 +116,7 @@ def calculate_all_predictions(date, od_choice, heure_choice, model, encoder):
 
     # Obtenir toutes les heures possibles pour la destination choisie,
     # en incluant seulement les heures dans l'intervalle spécifié
-    heures = [heure for heure in update_heures(od_choice, heure_choice) if interval_start <= int(heure) <= interval_end]
+    heures = [heure for heure in update_heures(od_choice, heure_choice) if (interval_start <= int(heure) <= interval_end and int(heure) != selected_heure_int)]
     all_combinations = []  # Stocker toutes les combinaisons possibles d'heure, gamme et numéro de train
     results = []  # Stocker les résultats des prédictions
 
@@ -148,7 +142,6 @@ def calculate_all_predictions(date, od_choice, heure_choice, model, encoder):
         results.append({'Heure': heure, 'Gamme': gamme, 'N° de Train': num_train, 'Prédiction': prediction})
 
     return results
-
 
 # Afficher les résultats
 def display_results(results):
@@ -194,10 +187,10 @@ with col1:
                                                 inputs_preprocessed = preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_date, encoder)
                                                 prediction = model.predict(inputs_preprocessed)
                                                 prediction_value = prediction[0]
-
+                                                #print(prediction_value)
                                                 if prediction_value < 0.105:
                                                     st.image("Images/Affluence Faible.png", width=200)
-                                                elif prediction_value < 0.46:
+                                                elif prediction_value <= 0.46:
                                                     st.image("Images/Affluence Moyenne.png", width=200)
                                                 else:
                                                     st.image("Images/Affluence Forte.png", width=200)
@@ -206,26 +199,28 @@ with col1:
 
                                                     # Ensuite, comparez les prédictions et calculez le pourcentage de différence
                                                     results_with_comparison = []
-
                                                     for result in results:
-                                                        # Extraire le scalaire de la prédiction avant de faire le calcul
+                                                        # Limiter la valeur minimale de prediction_result
+                                                        result['Prédiction'] = max(result['Prédiction'], 0.003756)
+
                                                         prediction_result = result['Prédiction']
-                                                        # Limiter la valeur minimale de prediction_result à 0
-                                                        prediction_result = max(prediction_result, 0)
                                                         difference_percentage = ((prediction_value - prediction_result) / prediction_value) * 100
                                                         # Ici, on convertit le pourcentage en scalaire pour éviter les erreurs de formatage et on l'arrondit
                                                         difference_percentage_value = round(difference_percentage, 1)
                                                         if difference_percentage_value>0:
                                                             result["Différence d'Affluence"] = f"{difference_percentage_value}% moins chargé que le train choisi"
+                                                            result["Pourcentage"]=difference_percentage_value
                                                             results_with_comparison.append(result)
-
+                                                
                                                     results_df = pd.DataFrame(results_with_comparison)
+                                                    
                                                     if not results_df.empty:
-                                                        # Appliquer la fonction extract_percentage
-                                                        results_df['Pourcentage'] = results_df["Différence d'Affluence"].apply(extract_percentage)
                                                         # Trier les résultats par pourcentage décroissant puis par Heure (croissant)
+                                                        # Convertir la colonne Heure en entier
+                                                        results_df['Heure'] = results_df['Heure'].astype(int)
                                                         sorted_results = results_df.sort_values(['Pourcentage'], ascending=False).head(5)
                                                         sorted_results.sort_values(['Heure'], ascending=True,inplace=True)
+
                                                         with col1:
                                                             st.subheader('Suggestions de Trains Moins Chargés')
                                                             # Affichez les résultats dans un tableau
