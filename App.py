@@ -16,7 +16,7 @@ favicon=Image.open('Images/Favicon.png')
 st.set_page_config(page_title="ONCF-Affluence", page_icon=favicon, layout="wide")
 
 # Chargez les données
-data = pd.read_csv('Aggregation des N° de Trains par OD+Gamme+Heure.csv')
+data = pd.read_csv('Aggregation_des_N°_de_Trains_par_OD+Gamme+Heure_New.csv')
 
 # Séparation des colonnes 'Origine' et 'Destination'
 data[['Origine', 'Destination']] = data['OD'].str.split(' - ', expand=True)
@@ -111,12 +111,18 @@ def calculate_all_predictions(date, od_choice, heure_choice, model, encoder):
     # Convertir l'heure choisie en integer pour la comparaison
     selected_heure_int = int(heure_choice)
     # Définir l'intervalle de 4 heures avant et après l'heure choisie
-    interval_start = selected_heure_int - 4
-    interval_end = selected_heure_int + 4
+    interval_start = selected_heure_int - 3
+    interval_end = selected_heure_int + 3
+    # Obtenir toutes les heures possibles pour la destination choisie
+    all_heures = update_heures(od_choice, heure_choice)
 
-    # Obtenir toutes les heures possibles pour la destination choisie,
-    # en incluant seulement les heures dans l'intervalle spécifié
-    heures = [heure for heure in update_heures(od_choice, heure_choice) if (interval_start <= int(heure) <= interval_end and int(heure) != selected_heure_int)]
+    # Si le nombre d'heures disponibles est >= 3, appliquer le filtrage avec intervalle
+    if len(all_heures) >= 4:
+        # Filtrer les heures dans l'intervalle spécifié
+        heures = [heure for heure in all_heures if (interval_start <= int(heure) <= interval_end)]
+    else:
+        # Si moins de 4 heures disponibles, ne pas filtrer par intervalle
+        heures = [heure for heure in all_heures]
     all_combinations = []  # Stocker toutes les combinaisons possibles d'heure, gamme et numéro de train
     results = []  # Stocker les résultats des prédictions
 
@@ -124,6 +130,11 @@ def calculate_all_predictions(date, od_choice, heure_choice, model, encoder):
     for heure in heures:
         # Obtenir toutes les gammes pour cette heure
         gammes = update_gammes(od_choice, heure)
+        # Filtrer les gammes pour exclure "AL BORAQ" si la gamme choisie n'est pas "AL BORAQ"
+        if gamme_choice != "AL BORAQ":
+            gammes = [gamme for gamme in gammes if gamme != "AL BORAQ"]
+        if gamme_choice == "AL BORAQ":
+            gammes = [gamme for gamme in gammes if gamme == "AL BORAQ"]
         # Pour chaque gamme
         for gamme in gammes:
             # Obtenir tous les numéros de train pour cette heure et cette gamme
