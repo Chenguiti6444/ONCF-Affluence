@@ -16,7 +16,7 @@ favicon=Image.open('Images/Favicon.png')
 st.set_page_config(page_title="ONCF-Affluence", page_icon=favicon, layout="wide")
 
 # Chargez les données
-data = pd.read_csv('Aggregation_des_N°_de_Trains_par_OD+Gamme+Heure_New.csv')
+data = pd.read_csv('Aggregation_des_Trains_par_OD+Gamme+Heure_New.csv')
 
 # Séparation des colonnes 'Origine' et 'Destination'
 data[['Origine', 'Destination']] = data['OD'].str.split(' - ', expand=True)
