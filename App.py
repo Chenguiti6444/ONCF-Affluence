@@ -24,42 +24,58 @@ origines = sorted([origine.strip() for origine in data['Origine'].unique()])
 destinations = sorted([destination.strip() for destination in data['Destination'].unique()])
 
 
-# Chargement du modèle et des préprocesseurs
+# Fonction pour obtenir la saison
+def get_season(date):
+    year = date.year
+    seasons = {
+        "winter_start": datetime(year, 12, 21).date(),
+        "spring_start": datetime(year, 3, 20).date(),
+        "summer_start": datetime(year, 6, 21).date(),
+        "fall_start": datetime(year, 9, 22).date()
+    }
+    
+    if date >= seasons["winter_start"] or date < seasons["spring_start"]:
+        return 0  # Hiver
+    elif date >= seasons["spring_start"] and date < seasons["summer_start"]:
+        return 1  # Printemps
+    elif date >= seasons["summer_start"] and date < seasons["fall_start"]:
+        return 2  # Été
+    else:
+        return 3  # Automne
+
+    
+# Chargement du modèle
 @st.cache_resource
-def load_model_and_preprocessors(model_zip_path, encoder_path):
+def load_model(model_zip_path):
     # Extract the model file from the zip archive
     with zipfile.ZipFile(model_zip_path, 'r') as zip_ref:
         zip_ref.extractall()
     
     # Load the model from the extracted file
     model = CatBoostRegressor()
-    model.load_model("model_catboost.cbm")  # Assuming the model file is named model_catboost.cbm
+    model.load_model("model_catboost_4.cbm")  # Assuming the model file is named model_catboost_4.cbm
     
-    # Load the encoder from the provided path
-    with open(encoder_path, 'rb') as file:
-        encoder = pickle.load(file)
-    
-    return model, encoder
+    return model
 
 
 # Prétraitement des entrées pour le modèle
-def preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_date, encoder):
+def preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_date):
+    semaine = selected_date.isocalendar().week
+    année = selected_date.isocalendar().year
+    saison = get_season(selected_date)
+    
     inputs = pd.DataFrame({
         'Nº de train': [num_train_choice],
         'Gamme': [gamme_choice],
         'Heure': [int(heure_choice)],
+        'Semaine': [semaine],
         'Jour_Semaine': [selected_date.weekday()],
-        'Mois': [selected_date.month]
+        'Année': [année],
+        'Saison': [saison]
     })
     
-    # Encodage des caractéristiques catégorielles
-    encoded_features = encoder.transform(inputs[['Nº de train', 'Gamme']])
-    encoded_features_df = pd.DataFrame(encoded_features, columns=encoder.get_feature_names_out(['Nº de train', 'Gamme']))
-    
-    # Concaténer les caractéristiques encodées avec les autres caractéristiques
-    features = pd.concat([inputs[['Heure', 'Jour_Semaine', 'Mois']], encoded_features_df], axis=1)
-    
-    return features
+    return inputs
+
 
 # Fonction pour mettre à jour les destinations basées sur l'origine sélectionnée
 def updateDestination(origine):
@@ -102,15 +118,15 @@ def update_num_train(od_choice, heure_choice, gamme_choice):
     return num_trains
 
 # Initialisation du encoder et du modèle
-model_zip_path = 'model_catboost.zip'
+model_zip_path = 'model_catboost_4.zip'
 encoder_path = 'encoder.pkl'
-model, encoder = load_model_and_preprocessors(model_zip_path, encoder_path)
+model = load_model(model_zip_path)
 
 # Calculer toutes les prédictions possibles
-def calculate_all_predictions(date, od_choice, heure_choice, model, encoder):
+def calculate_all_predictions(date, od_choice, heure_choice, model):
     # Convertir l'heure choisie en integer pour la comparaison
     selected_heure_int = int(heure_choice)
-    # Définir l'intervalle de 4 heures avant et après l'heure choisie
+    # Définir l'intervalle de 3 heures avant et après l'heure choisie
     interval_start = selected_heure_int - 3
     interval_end = selected_heure_int + 3
     # Obtenir toutes les heures possibles pour la destination choisie
@@ -146,7 +162,7 @@ def calculate_all_predictions(date, od_choice, heure_choice, model, encoder):
     # Pour chaque combinaison possible
     for heure, gamme, num_train in all_combinations:
         # Prétraiter les entrées pour les rendre compatibles avec le modèle
-        inputs_preprocessed = preprocess_inputs(heure, gamme, num_train, date, encoder)
+        inputs_preprocessed = preprocess_inputs(heure, gamme, num_train, date)
         # Faire une prédiction avec le modèle
         prediction = model.predict(inputs_preprocessed)[0]
         # Stocker les résultats avec les caractéristiques correspondantes
@@ -195,7 +211,7 @@ with col1:
 
                                         if selected_date and od_choice and heure_choice and gamme_choice and num_train_choice:
                                             if st.button('Prédire l\'affluence'):
-                                                inputs_preprocessed = preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_date, encoder)
+                                                inputs_preprocessed = preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_date)
                                                 prediction = model.predict(inputs_preprocessed)
                                                 prediction_value = prediction[0]
                                                 #print(prediction_value)
@@ -206,7 +222,7 @@ with col1:
                                                 else:
                                                     st.image("Images/Affluence Forte.png", width=200)
                                                 if selected_date and od_choice and num_train_choice and prediction_value>=0.105:
-                                                    results = calculate_all_predictions(selected_date, od_choice,heure_choice,model,encoder)
+                                                    results = calculate_all_predictions(selected_date, od_choice,heure_choice,model)
 
                                                     # Ensuite, comparez les prédictions et calculez le pourcentage de différence
                                                     results_with_comparison = []
