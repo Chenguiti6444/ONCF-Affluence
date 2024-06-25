@@ -62,6 +62,7 @@ def load_model(model_zip_path):
 def preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_date):
     semaine = selected_date.isocalendar().week
     année = selected_date.isocalendar().year
+    jour_semaine = selected_date.isocalendar().weekday
     saison = get_season(selected_date)
     
     inputs = pd.DataFrame({
@@ -69,7 +70,7 @@ def preprocess_inputs(heure_choice, gamme_choice, num_train_choice, selected_dat
         'Gamme': [gamme_choice],
         'Heure': [int(heure_choice)],
         'Semaine': [semaine],
-        'Jour_Semaine': [selected_date.weekday()],
+        'Jour_Semaine': [jour_semaine],
         'Année': [année],
         'Saison': [saison]
     })
