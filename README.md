@@ -38,7 +38,7 @@ To run this application locally, follow these steps:
 ## File Descriptions
 
 - **App.py**: Main script to run the Streamlit app.
-- **model_catboost_4.zip**: Pre-trained CatBoost model for occupancy prediction.
+- **model_catboost_4.zip**: CatBoost model trained on data from the ONCF PIS (Passenger Information System) for train occupancy prediction.
 - **encoder.pkl**: Encoder used for transforming categorical data.
 - **requirements.txt**: List of dependencies required to run the application.
 
@@ -96,7 +96,7 @@ Pour exécuter cette application localement, suivez ces étapes :
 ## Description des Fichiers
 
 - **App.py** : Script principal pour exécuter l'application Streamlit.
-- **model_catboost_4.zip** : Modèle CatBoost pré-entraîné pour la prédiction d'affluence.
+- **model_catboost_4.zip** : Modèle CatBoost entraîné sur des données issues du Système d'Information Voyageurs (SIV) de l'ONCF pour prédire l'affluence à bord des trains.
 - **encoder.pkl** : Encodeur utilisé pour transformer les données catégorielles.
 - **requirements.txt** : Liste des dépendances nécessaires pour exécuter l'application.
 
