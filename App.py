@@ -118,9 +118,8 @@ def update_num_train(od_choice, heure_choice, gamme_choice):
     num_trains = sorted(set([train.strip() for sublist in filtered_data['N° de train'].dropna().str.split(',') for train in sublist]))
     return num_trains
 
-# Initialisation du encoder et du modèle
+# Initialisation du modèle
 model_zip_path = 'model_catboost_4.zip'
-encoder_path = 'encoder.pkl'
 model = load_model(model_zip_path)
 
 # Calculer toutes les prédictions possibles
