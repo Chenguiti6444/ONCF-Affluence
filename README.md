@@ -107,7 +107,7 @@ Pour exécuter cette application localement, suivez ces étapes :
 - **.gitignore** : Un fichier spécifiant quels fichiers et répertoires doivent être ignorés par le contrôle de version Git.
 - **.devcontainer/** : Répertoire contenant les fichiers de configuration pour le développement dans un conteneur. Ceci est utile pour assurer un environnement de développement cohérent sur différentes machines.
 - **Images/** : Un dossier contenant les images utilisées dans le projet (par exemple, logos, icônes).
-- **Aggregation_des_N°_de_Trains_par_OD+Gamme.csv** : Un fichier CSV qui associe chaque triplet composé d'une paire origine-destination (OD), d'une gamme de train (Gamme), et d'une heure de départ (Heure) avec le ou les numéros de trains valables pour ce triplet. Il est utilisé pour filtrer la liste déroulante affichée au niveau de l'interface de l'application ONCF Affluence, permettant aux utilisateurs de sélectionner des numéros de trains valables.
+- **Aggregation_des_N°_de_Trains_par_OD+Gamme.csv** : Un fichier CSV qui associe chaque triplet composé d'une paire origine-destination (OD), d'une gamme de train (Gamme), et d'une heure de départ (Heure) avec le ou les numéros de trains disponibles pour ce triplet. Il est utilisé pour filtrer la liste déroulante affichée au niveau de l'interface de l'application ONCF Affluence, permettant aux utilisateurs de sélectionner des numéros de trains valides.
 
 ## Licence
 
