@@ -56,7 +56,7 @@ For questions or suggestions, please contact [chenguiti.elmehdi@gmail.com].
 
 # Application Web Streamlit de Prédiction d'Affluence à Bord des Trains ONCF
 
-## Aperçu
+## Introduction
 
 Ce dépôt contient une application web Streamlit conçue pour prédire le niveau d'affluence à bord des trains ONCF. L'application utilise l'apprentissage automatique pour prévoir l'affluence à bord des trains, aidant ainsi les voyageurs à choisir des trains moins bondés tout en optimisant le trafic ferroviaire.
 
@@ -102,8 +102,4 @@ Les contributions sont les bienvenues ! Veuillez soumettre une pull request ou o
 
 ## Contact
 
-Pour des questions ou suggestions, veuillez contacter [Votre Email].
-
----
-
-Feel free to replace `[Your Email]` with your actual email address or any other preferred contact method.
+Pour des questions ou suggestions, veuillez contacter [chenguiti.elmehdi@gmail.com].
