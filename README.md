@@ -39,7 +39,13 @@ To run this application locally, follow these steps:
 
 - **App.py**: Main script to run the Streamlit app.
 - **model_catboost_4.zip**: CatBoost model trained on data from the ONCF PIS (Passenger Information System) for train occupancy prediction.
-- **requirements.txt**: List of dependencies required to run the application.
+- **requirements.txt**: A text file listing all the Python libraries and dependencies required to run the application. Installing these ensures the environment is correctly set up for the Streamlit app.
+- **LICENSE**: The license file for the project, indicating the legal terms under which the project can be used, modified, and distributed. This project uses the MIT License.
+- **.gitignore**: A file specifying which files and directories should be ignored by Git version control.
+- **.devcontainer/**: Directory containing configuration files for developing inside a container. This is useful for ensuring a consistent development environment across different machines.
+- **Images/**: A folder containing images used in the project (e.g., logos, icons).
+- **Aggregation_des_N°_de_Trains_par_OD+Gamme.csv**: A CSV file that associates each triplet of origin-destination (OD), train type (Gamme), and departure time (Heure) with the available train numbers for that triplet. It is used to filter the dropdown list displayed in the ONCF Affluence interface, allowing users to select valid train numbers.
+
 
 ## License
 
@@ -96,7 +102,12 @@ Pour exécuter cette application localement, suivez ces étapes :
 
 - **App.py** : Script principal pour exécuter l'application Streamlit.
 - **model_catboost_4.zip** : Modèle CatBoost entraîné sur des données issues du Système d'Information Voyageurs (SIV) de l'ONCF pour prédire l'affluence à bord des trains.
-- **requirements.txt** : Liste des dépendances nécessaires pour exécuter l'application.
+- **requirements.txt** : Un fichier texte listant toutes les bibliothèques Python et dépendances nécessaires pour exécuter l'application. L'installation de ces dépendances garantit que l'environnement est correctement configuré pour l'application Streamlit.
+- **LICENSE** : Le fichier de licence du projet, indiquant les conditions légales sous lesquelles le projet peut être utilisé, modifié et distribué. Ce projet utilise la licence MIT.
+- **.gitignore** : Un fichier spécifiant quels fichiers et répertoires doivent être ignorés par le contrôle de version Git.
+- **.devcontainer/** : Répertoire contenant les fichiers de configuration pour le développement dans un conteneur. Ceci est utile pour assurer un environnement de développement cohérent sur différentes machines.
+- **Images/** : Un dossier contenant les images utilisées dans le projet (par exemple, logos, icônes).
+- **Aggregation_des_N°_de_Trains_par_OD+Gamme.csv** : Un fichier CSV qui associe chaque triplet composé d'une paire origine-destination (OD), d'une gamme de train (Gamme), et d'une heure de départ (Heure) avec le ou les numéros de trains valables pour ce triplet. Il est utilisé pour filtrer la liste déroulante affichée au niveau de l'interface de l'application ONCF Affluence, permettant aux utilisateurs de sélectionner des numéros de trains valables.
 
 ## Licence
 
