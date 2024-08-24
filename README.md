@@ -12,16 +12,20 @@ To run this application locally, follow these steps:
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/Chenguiti6444/ONCF-Trains-Occupancy-Prediction.git
-    cd ONCF-Trains-Occupancy-Prediction
+    git clone https://github.com/Chenguiti6444/ONCF-Affluence.git
     ```
 
-2. **Install the required packages**:
+2. **Navigate to the project directory**:
+    ```bash
+    cd ONCF-Affluence
+    ```
+
+3. **Install the required packages**:
     ```bash
     pip install -r requirements.txt
     ```
 
-3. **Run the application**:
+4. **Run the application**:
     ```bash
     streamlit run App.py
     ```
@@ -66,16 +70,20 @@ Pour exécuter cette application localement, suivez ces étapes :
 
 1. **Clonez le dépôt** :
     ```bash
-    git clone https://github.com/Chenguiti6444/ONCF-Trains-Occupancy-Prediction.git
-    cd ONCF-Trains-Occupancy-Prediction
+    git clone https://github.com/Chenguiti6444/ONCF-Affluence.git
     ```
 
-2. **Installez les packages requis** :
+2. **Accédez au répertoire du projet** :
+    ```bash
+    cd ONCF-Affluence
+    ```
+
+3. **Installez les packages requis** :
     ```bash
     pip install -r requirements.txt
     ```
 
-3. **Exécutez l'application** :
+4. **Exécutez l'application** :
     ```bash
     streamlit run App.py
     ```
