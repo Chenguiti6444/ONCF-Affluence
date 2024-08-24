@@ -48,7 +48,7 @@ Contributions are welcome! Please submit a pull request or open an issue to disc
 
 ## Contact
 
-For questions or suggestions, please contact [chenguiti.elmehdi@gmail.com].
+For questions or suggestions, please contact chenguiti.elmehdi@gmail.com.
 
 ---
 
@@ -102,4 +102,4 @@ Les contributions sont les bienvenues ! Veuillez soumettre une pull request ou o
 
 ## Contact
 
-Pour des questions ou suggestions, veuillez contacter [chenguiti.elmehdi@gmail.com].
+Pour des questions ou suggestions, veuillez contacter chenguiti.elmehdi@gmail.com.
